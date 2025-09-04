@@ -9,6 +9,9 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
+  define: {
+    __APP_NAME__: JSON.stringify("RateMyCoop"),
+  },
   plugins: [
     react(),
     mode === 'development' &&
