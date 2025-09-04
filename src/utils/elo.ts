@@ -1,5 +1,3 @@
-import { updateCompanyElo, recordVote } from '@/lib/database';
-
 // Chess ELO rating system implementation
 export const calculateEloChange = (winnerRating: number, loserRating: number, kFactor: number = 32): { winnerNewRating: number; loserNewRating: number } => {
   // Expected score calculation
@@ -16,40 +14,18 @@ export const calculateEloChange = (winnerRating: number, loserRating: number, kF
   };
 };
 
-// Process a vote and update ELO ratings in the database
-export const processVote = async (winnerId: number, loserId: number, winnerRating: number, loserRating: number): Promise<boolean> => {
-  try {
-    // Calculate new ELO ratings
-    const { winnerNewRating, loserNewRating } = calculateEloChange(winnerRating, loserRating);
-    
-    // Update both companies' ELO ratings in the database
-    const winnerUpdate = await updateCompanyElo(winnerId, winnerNewRating);
-    const loserUpdate = await updateCompanyElo(loserId, loserNewRating);
-    
-    // Record the vote
-    const voteRecorded = await recordVote(winnerId, loserId);
-    
-    return winnerUpdate && loserUpdate && voteRecorded;
-  } catch (error) {
-    console.error('Error processing vote:', error);
-    return false;
-  }
-};
-
-// Legacy functions for backward compatibility (now using database)
+// Store ELO ratings in localStorage for persistence
 export const getStoredRatings = (): Record<number, number> => {
-  // This function is now deprecated as we use the database
-  console.warn('getStoredRatings is deprecated. Use getCompanies() from database instead.');
-  return {};
+  const stored = localStorage.getItem('company-elos');
+  return stored ? JSON.parse(stored) : {};
 };
 
 export const updateStoredRating = (companyId: number, newRating: number): void => {
-  // This function is now deprecated as we use the database
-  console.warn('updateStoredRating is deprecated. Use updateCompanyElo() from database instead.');
-  updateCompanyElo(companyId, newRating);
+  const stored = getStoredRatings();
+  stored[companyId] = newRating;
+  localStorage.setItem('company-elos', JSON.stringify(stored));
 };
 
 export const resetAllRatings = (): void => {
-  // This function is now deprecated as we use the database
-  console.warn('resetAllRatings is deprecated. Reset ratings directly in the database instead.');
+  localStorage.removeItem('company-elos');
 };

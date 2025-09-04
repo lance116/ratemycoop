@@ -1,11 +1,8 @@
 {
-  "name": "ratemycoop",
+  "name": "vite_react_shadcn_ts",
   "private": true,
-  "version": "1.0.0",
+  "version": "0.0.0",
   "type": "module",
-  "description": "RateMyCoop - Vote and rank software engineering internships at University of Waterloo using ELO rating system",
-  "keywords": ["co-op", "internship", "software engineering", "UWaterloo", "ranking", "reviews", "ELO rating"],
-  "author": "RateMyCoop",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

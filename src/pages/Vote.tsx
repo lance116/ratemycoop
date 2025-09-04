@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { getCompanies, Company } from "@/data/companies";
-import { processVote } from "@/utils/elo";
+import { calculateEloChange, updateStoredRating } from "@/utils/elo";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Star, Trophy } from "lucide-react";
@@ -12,17 +12,9 @@ const Vote = () => {
   const [votes, setVotes] = useState(0);
 
   useEffect(() => {
-    const loadCompanies = async () => {
-      try {
-        const loadedCompanies = await getCompanies();
-        setCompanies(loadedCompanies);
-        setCurrentPair(getRandomPair(loadedCompanies));
-      } catch (error) {
-        console.error('Error loading companies:', error);
-      }
-    };
-    
-    loadCompanies();
+    const loadedCompanies = getCompanies();
+    setCompanies(loadedCompanies);
+    setCurrentPair(getRandomPair(loadedCompanies));
   }, []);
 
   const getRandomPair = (companiesList: Company[]) => {
@@ -39,25 +31,31 @@ const Vote = () => {
     const [leftCompany, rightCompany] = currentPair;
     const loser = winner.id === leftCompany.id ? rightCompany : leftCompany;
     
-    try {
-      // Process vote and update ELO ratings in database
-      const success = await processVote(winner.id, loser.id, winner.elo, loser.elo);
-      
-      if (success) {
-        // Reload companies to get updated ELO ratings
-        const updatedCompanies = await getCompanies();
-        setCompanies(updatedCompanies);
-        
-        // Get new pair from updated companies
-        setCurrentPair(getRandomPair(updatedCompanies));
-      } else {
-        console.error('Failed to process vote');
+    // Calculate new ELO ratings
+    const { winnerNewRating, loserNewRating } = calculateEloChange(winner.elo, loser.elo);
+    
+    // Update stored ratings
+    updateStoredRating(winner.id, winnerNewRating);
+    updateStoredRating(loser.id, loserNewRating);
+    
+    // Update local company list with new ratings
+    const updatedCompanies = companies.map(company => {
+      if (company.id === winner.id) {
+        return { ...company, elo: winnerNewRating };
+      } else if (company.id === loser.id) {
+        return { ...company, elo: loserNewRating };
       }
-    } catch (error) {
-      console.error('Error processing vote:', error);
-    } finally {
-      setIsVoting(false);
-    }
+      return company;
+    });
+    
+    setCompanies(updatedCompanies);
+    
+    // Simulate API call delay for better UX
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    // Get new pair from updated companies
+    setCurrentPair(getRandomPair(updatedCompanies));
+    setIsVoting(false);
   };
 
   if (!currentPair) {
