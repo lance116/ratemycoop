@@ -1,14 +1,30 @@
-import { getCompanies } from "@/data/companies";
+import { useState, useEffect } from "react";
+import { getCompanies, Company } from "@/data/companies";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Star, Search, MessageSquare } from "lucide-react";
-import { useState } from "react";
 import { Link } from "react-router-dom";
 
 const Reviews = () => {
-  const companies = getCompanies();
+  const [companies, setCompanies] = useState<Company[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadCompanies = async () => {
+      try {
+        const loadedCompanies = await getCompanies();
+        setCompanies(loadedCompanies);
+      } catch (error) {
+        console.error('Error loading companies:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadCompanies();
+  }, []);
 
   const filteredCompanies = companies.filter(company =>
     company.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -31,6 +47,17 @@ const Reviews = () => {
       </div>
     );
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading reviews...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">

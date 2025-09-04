@@ -1,5 +1,6 @@
 import { useParams, Link } from "react-router-dom";
-import { getCompanies } from "@/data/companies";
+import { useState, useEffect } from "react";
+import { getCompany, createReview, Company } from "@/data/companies";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,13 +8,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Star, ArrowLeft, MessageSquare, Trophy, TrendingUp } from "lucide-react";
-import { useState } from "react";
 
 const CompanyDetails = () => {
-  const companies = getCompanies();
   const { id } = useParams();
-  const company = companies.find(c => c.id === parseInt(id || ""));
+  const [company, setCompany] = useState<Company | null>(null);
+  const [loading, setLoading] = useState(true);
   const [showReviewForm, setShowReviewForm] = useState(false);
+  const [submittingReview, setSubmittingReview] = useState(false);
   const [newReview, setNewReview] = useState({
     rating: 5,
     content: "",
@@ -21,6 +22,34 @@ const CompanyDetails = () => {
     program: "",
     year: ""
   });
+
+  useEffect(() => {
+    const loadCompany = async () => {
+      if (!id) return;
+      
+      try {
+        const companyData = await getCompany(parseInt(id));
+        setCompany(companyData);
+      } catch (error) {
+        console.error('Error loading company:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadCompany();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading company details...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!company) {
     return (
@@ -35,18 +64,45 @@ const CompanyDetails = () => {
     );
   }
 
-  const handleSubmitReview = (e: React.FormEvent) => {
+  const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, this would submit to an API
-    console.log("Review submitted:", newReview);
-    setShowReviewForm(false);
-    setNewReview({
-      rating: 5,
-      content: "",
-      author: "",
-      program: "",
-      year: ""
-    });
+    if (!company || submittingReview) return;
+    
+    setSubmittingReview(true);
+    
+    try {
+      const success = await createReview({
+        company_id: company.id,
+        author: newReview.author || "Anonymous",
+        rating: newReview.rating,
+        content: newReview.content,
+        program: newReview.program,
+        year: newReview.year
+      });
+      
+      if (success) {
+        // Reload company data to get updated reviews
+        const updatedCompany = await getCompany(company.id);
+        if (updatedCompany) {
+          setCompany(updatedCompany);
+        }
+        
+        setShowReviewForm(false);
+        setNewReview({
+          rating: 5,
+          content: "",
+          author: "",
+          program: "",
+          year: ""
+        });
+      } else {
+        console.error('Failed to submit review');
+      }
+    } catch (error) {
+      console.error('Error submitting review:', error);
+    } finally {
+      setSubmittingReview(false);
+    }
   };
 
   const renderStars = (rating: number, interactive = false, onChange?: (rating: number) => void) => {
@@ -67,7 +123,8 @@ const CompanyDetails = () => {
     );
   };
 
-  const rank = companies.indexOf(company) + 1;
+  // For now, we'll show a placeholder rank since we don't have all companies loaded
+  const rank = 1; // This would need to be calculated based on ELO ranking
 
   return (
     <div className="min-h-screen bg-background">
@@ -197,11 +254,14 @@ const CompanyDetails = () => {
                   </div>
 
                   <div className="flex space-x-3">
-                    <Button type="submit">Submit Review</Button>
+                    <Button type="submit" disabled={submittingReview}>
+                      {submittingReview ? "Submitting..." : "Submit Review"}
+                    </Button>
                     <Button
                       type="button"
                       variant="outline"
                       onClick={() => setShowReviewForm(false)}
+                      disabled={submittingReview}
                     >
                       Cancel
                     </Button>

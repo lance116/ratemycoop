@@ -1,11 +1,28 @@
-import { getCompanies } from "@/data/companies";
+import { useState, useEffect } from "react";
+import { getCompanies, Company } from "@/data/companies";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Star, Trophy, Medal, Award } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Leaderboard = () => {
-  const companies = getCompanies();
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadCompanies = async () => {
+      try {
+        const loadedCompanies = await getCompanies();
+        setCompanies(loadedCompanies);
+      } catch (error) {
+        console.error('Error loading companies:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadCompanies();
+  }, []);
   const getRankIcon = (rank: number) => {
     switch (rank) {
       case 1:
@@ -31,6 +48,17 @@ const Leaderboard = () => {
         return "border-border hover:border-primary/20";
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading leaderboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
