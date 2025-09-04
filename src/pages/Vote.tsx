@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { getCompanies, Company } from "@/data/companies";
-import { calculateEloChange, updateStoredRating } from "@/utils/elo";
+import { processVote } from "@/utils/elo";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Star, Trophy } from "lucide-react";
@@ -12,9 +12,17 @@ const Vote = () => {
   const [votes, setVotes] = useState(0);
 
   useEffect(() => {
-    const loadedCompanies = getCompanies();
-    setCompanies(loadedCompanies);
-    setCurrentPair(getRandomPair(loadedCompanies));
+    const loadCompanies = async () => {
+      try {
+        const loadedCompanies = await getCompanies();
+        setCompanies(loadedCompanies);
+        setCurrentPair(getRandomPair(loadedCompanies));
+      } catch (error) {
+        console.error('Error loading companies:', error);
+      }
+    };
+    
+    loadCompanies();
   }, []);
 
   const getRandomPair = (companiesList: Company[]) => {
