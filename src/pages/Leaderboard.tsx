@@ -22,7 +22,7 @@ const Leaderboard = () => {
   const getRankStyle = (rank: number) => {
     switch (rank) {
       case 1:
-        return "border-gold bg-gradient-to-r from-gold/10 to-gold/5 animate-pulse-gold";
+        return "border-gold bg-gradient-to-r from-gold/10 to-gold/5 shadow-gold";
       case 2:
         return "border-silver bg-gradient-to-r from-silver/10 to-silver/5";
       case 3:

@@ -6,14 +6,17 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Star, ArrowLeft, MessageSquare, Trophy, TrendingUp } from "lucide-react";
-import { useState } from "react";
+import { LineChart } from "@/components/ui/line-chart";
+import { Star, ArrowLeft, MessageSquare, Trophy, TrendingUp, BarChart3 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { getEloHistory, EloHistoryEntry } from "@/utils/elo";
 
 const CompanyDetails = () => {
   const companies = getCompanies();
   const { id } = useParams();
   const company = companies.find(c => c.id === parseInt(id || ""));
   const [showReviewForm, setShowReviewForm] = useState(false);
+  const [eloHistory, setEloHistory] = useState<EloHistoryEntry[]>([]);
   const [newReview, setNewReview] = useState({
     rating: 5,
     content: "",
@@ -21,6 +24,13 @@ const CompanyDetails = () => {
     program: "",
     year: ""
   });
+
+  useEffect(() => {
+    if (company) {
+      const history = getEloHistory(company.id);
+      setEloHistory(history);
+    }
+  }, [company]);
 
   if (!company) {
     return (
@@ -128,6 +138,57 @@ const CompanyDetails = () => {
                 </div>
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* ELO History Chart */}
+        <Card className="mb-8">
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-2 mb-4">
+              <BarChart3 className="h-5 w-5 text-primary" />
+              <h2 className="text-xl font-bold text-foreground">ELO Rating History</h2>
+            </div>
+            
+            {eloHistory.length > 0 ? (
+              <div className="space-y-6">
+                <LineChart 
+                  data={eloHistory.map(entry => ({
+                    x: entry.timestamp,
+                    y: entry.elo,
+                    label: new Date(entry.timestamp).toLocaleDateString()
+                  }))}
+                  width={600}
+                  height={250}
+                  className="mx-auto"
+                />
+                
+                {/* Peak and Lowest Ratings */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="text-center p-6 bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-lg border border-green-200 dark:border-green-800">
+                    <div className="text-3xl font-bold text-green-600 dark:text-green-400">
+                      {Math.max(...eloHistory.map(h => h.elo))}
+                    </div>
+                    <div className="text-sm text-green-600 dark:text-green-400 font-medium">Peak Rating</div>
+                  </div>
+                  <div className="text-center p-6 bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 rounded-lg border border-red-200 dark:border-red-800">
+                    <div className="text-3xl font-bold text-red-600 dark:text-red-400">
+                      {Math.min(...eloHistory.map(h => h.elo))}
+                    </div>
+                    <div className="text-sm text-red-600 dark:text-red-400 font-medium">Lowest Rating</div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <TrendingUp className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-foreground mb-2">
+                  No ELO History Yet
+                </h3>
+                <p className="text-muted-foreground">
+                  ELO ratings will be tracked as students vote on this company.
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
 

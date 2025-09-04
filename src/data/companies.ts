@@ -272,16 +272,26 @@ export const baseCompanies: Company[] = [
   }
 ];
 
-import { getStoredRatings } from '@/utils/elo';
+import { getStoredRatings, getEloHistory, updateEloHistory } from '@/utils/elo';
 
 export const getCompanies = (): Company[] => {
   const storedRatings = getStoredRatings();
   
   return baseCompanies
-    .map(company => ({
-      ...company,
-      elo: storedRatings[company.id] || company.elo
-    }))
+    .map(company => {
+      const currentElo = storedRatings[company.id] || company.elo;
+      
+      // Initialize ELO history if it doesn't exist
+      const history = getEloHistory(company.id);
+      if (history.length === 0) {
+        updateEloHistory(company.id, currentElo);
+      }
+      
+      return {
+        ...company,
+        elo: currentElo
+      };
+    })
     .sort((a, b) => b.elo - a.elo);
 };
 

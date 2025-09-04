@@ -122,3 +122,9 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .shadow-gold {
+    box-shadow: var(--shadow-gold);
+  }
+}
