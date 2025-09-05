@@ -34,7 +34,7 @@ const Leaderboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-y-auto scroll-smooth">
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-foreground mb-2">
@@ -45,7 +45,7 @@ const Leaderboard = () => {
           </p>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 scroll-smooth">
           {companies.map((company, index) => {
             const rank = index + 1;
             return (

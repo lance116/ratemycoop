@@ -530,7 +530,7 @@ export const baseCompanies: Company[] = [
   {
     id: 47,
     name: "Epic Games",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/7/74/Epic_Games_logo.svg",
+    logo: "/epic%20games.png",
     rating: 0,
     elo: 1600,
     description: "Video game development and publishing company",
@@ -541,7 +541,7 @@ export const baseCompanies: Company[] = [
   {
     id: 48,
     name: "Electronic Arts",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/0/0d/Electronic_Arts_logo.svg",
+    logo: "/ea.png",
     rating: 0,
     elo: 1600,
     description: "Video game publishing and development company",
@@ -574,7 +574,7 @@ export const baseCompanies: Company[] = [
   {
     id: 51,
     name: "Reddit",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/5/58/Reddit_logo_new.svg",
+    logo: "/reddit.png",
     rating: 0,
     elo: 1600,
     description: "Social news aggregation and discussion platform",
@@ -596,7 +596,7 @@ export const baseCompanies: Company[] = [
   {
     id: 53,
     name: "Snap Inc.",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/2/2e/Snapchat_logo.svg",
+    logo: "/snapchat.png",
     rating: 0,
     elo: 1600,
     description: "Social media and camera company",
@@ -651,7 +651,7 @@ export const baseCompanies: Company[] = [
   {
     id: 58,
     name: "Atlassian",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/8/8f/Atlassian-horizontal-blue-rgb.svg",
+    logo: "/atlassian.png",
     rating: 0,
     elo: 1600,
     description: "Software development and collaboration tools",
@@ -706,7 +706,7 @@ export const baseCompanies: Company[] = [
   {
     id: 63,
     name: "SAP",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/5/59/SAP_logo.svg",
+    logo: "/sap.webp",
     rating: 0,
     elo: 1600,
     description: "Enterprise application software and services",
@@ -739,7 +739,7 @@ export const baseCompanies: Company[] = [
   {
     id: 66,
     name: "Affirm",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/4/4a/Affirm_logo.svg",
+    logo: "/affirm.png",
     rating: 0,
     elo: 1600,
     description: "Buy now, pay later financial services",
@@ -783,7 +783,7 @@ export const baseCompanies: Company[] = [
   {
     id: 70,
     name: "Riot Games",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/7/7a/Riot_Games_logo.svg",
+    logo: "/riot%20games.png",
     rating: 0,
     elo: 1600,
     description: "Video game developer and publisher",
@@ -816,7 +816,7 @@ export const baseCompanies: Company[] = [
   {
     id: 73,
     name: "Nintendo",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/0/0d/Nintendo_logo.svg",
+    logo: "/nintendo.png",
     rating: 0,
     elo: 1600,
     description: "Video game console and software company",
@@ -849,7 +849,7 @@ export const baseCompanies: Company[] = [
   {
     id: 76,
     name: "DoorDash",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/7/7a/DoorDash_logo.svg",
+    logo: "/doordash.png",
     rating: 0,
     elo: 1600,
     description: "Food delivery and logistics platform",
@@ -981,7 +981,7 @@ export const baseCompanies: Company[] = [
   {
     id: 88,
     name: "Capital One",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/7/7a/Capital_One_logo.svg",
+    logo: "/capital%20one.png",
     rating: 0,
     elo: 1600,
     description: "Financial services and credit card company",
@@ -992,7 +992,7 @@ export const baseCompanies: Company[] = [
   {
     id: 89,
     name: "Goldman Sachs",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/7/7a/Goldman_Sachs_logo.svg",
+    logo: "/goldman%20sachs.png",
     rating: 0,
     elo: 1600,
     description: "Investment banking and financial services",
@@ -1003,7 +1003,7 @@ export const baseCompanies: Company[] = [
   {
     id: 90,
     name: "Jane Street",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/7/7a/Jane_Street_logo.svg",
+    logo: "/jane%20street.png",
     rating: 0,
     elo: 1600,
     description: "Quantitative trading and market making firm",
@@ -1014,7 +1014,7 @@ export const baseCompanies: Company[] = [
   {
     id: 91,
     name: "Citadel",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/7/7a/Citadel_logo.svg",
+    logo: "/citadel.jpg",
     rating: 0,
     elo: 1600,
     description: "Investment management and trading firm",
@@ -1025,7 +1025,7 @@ export const baseCompanies: Company[] = [
   {
     id: 92,
     name: "Two Sigma",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/7/7a/Two_Sigma_logo.svg",
+    logo: "/two%20sigma.png",
     rating: 0,
     elo: 1600,
     description: "Quantitative investment management and technology",
@@ -1036,7 +1036,7 @@ export const baseCompanies: Company[] = [
   {
     id: 93,
     name: "Jump Trading",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/7/7a/Jump_Trading_logo.svg",
+    logo: "/jump.png",
     rating: 0,
     elo: 1600,
     description: "Quantitative trading and market making firm",
@@ -1047,7 +1047,7 @@ export const baseCompanies: Company[] = [
   {
     id: 94,
     name: "Hudson River Trading",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/7/7a/HRT_logo.svg",
+    logo: "/HRT.png",
     rating: 0,
     elo: 1600,
     description: "Quantitative trading and technology firm",
@@ -1058,7 +1058,7 @@ export const baseCompanies: Company[] = [
   {
     id: 95,
     name: "IMC Trading",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/7/7a/IMC_logo.svg",
+    logo: "/imc.jpg",
     rating: 0,
     elo: 1600,
     description: "Quantitative trading and market making firm",
@@ -1069,7 +1069,7 @@ export const baseCompanies: Company[] = [
   {
     id: 96,
     name: "Optiver",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/7/7a/Optiver_logo.svg",
+    logo: "/optiver.png",
     rating: 0,
     elo: 1600,
     description: "Market making and quantitative trading firm",
@@ -1113,7 +1113,7 @@ export const baseCompanies: Company[] = [
   {
     id: 100,
     name: "AMD",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/7/7a/AMD_logo.svg",
+    logo: "/amd.png",
     rating: 0,
     elo: 1600,
     description: "Semiconductor and microprocessor company",
@@ -1245,7 +1245,7 @@ export const baseCompanies: Company[] = [
   {
     id: 112,
     name: "Datadog",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/7/7a/Datadog_logo.svg",
+    logo: "/datadog.png",
     rating: 0,
     elo: 1600,
     description: "Monitoring and analytics platform for cloud applications",
