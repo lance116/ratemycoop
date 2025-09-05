@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { getCompanies, Company } from "@/data/companies";
-import { calculateEloChange, updateStoredRating } from "@/utils/elo";
+import { processVote } from "@/utils/elo";
+import { supabaseApi } from "@/lib/supabase";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PayStats } from "@/components/ui/pay-stats";
@@ -13,10 +14,30 @@ const Vote = () => {
   const [votes, setVotes] = useState(0);
 
   useEffect(() => {
-    const loadedCompanies = getCompanies();
-    setCompanies(loadedCompanies);
-    setCurrentPair(getRandomPair(loadedCompanies));
-  }, []);
+    const loadCompanies = async () => {
+      try {
+        const loadedCompanies = await getCompanies();
+        setCompanies(loadedCompanies);
+        setCurrentPair(getRandomPair(loadedCompanies));
+      } catch (error) {
+        console.error('Failed to load companies:', error);
+      }
+    };
+    
+    loadCompanies();
+
+    // Set up real-time subscription for company updates
+    const channel = supabaseApi.subscribeToCompanyUpdates((payload) => {
+      // Refresh companies when ELO ratings change from other users' votes
+      if (!isVoting) { // Don't refresh during our own vote process
+        loadCompanies();
+      }
+    });
+
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [isVoting]);
 
   const getRandomPair = (companiesList: Company[]) => {
     const shuffled = [...companiesList].sort(() => 0.5 - Math.random());
@@ -32,31 +53,28 @@ const Vote = () => {
     const [leftCompany, rightCompany] = currentPair;
     const loser = winner.id === leftCompany.id ? rightCompany : leftCompany;
     
-    // Calculate new ELO ratings
-    const { winnerNewRating, loserNewRating } = calculateEloChange(winner.elo, loser.elo);
-    
-    // Update stored ratings
-    updateStoredRating(winner.id, winnerNewRating);
-    updateStoredRating(loser.id, loserNewRating);
-    
-    // Update local company list with new ratings
-    const updatedCompanies = companies.map(company => {
-      if (company.id === winner.id) {
-        return { ...company, elo: winnerNewRating };
-      } else if (company.id === loser.id) {
-        return { ...company, elo: loserNewRating };
+    try {
+      // Process vote using Supabase
+      const { error } = await processVote(winner.id, loser.id);
+      
+      if (error) {
+        console.error('Failed to process vote:', error);
+        setIsVoting(false);
+        return;
       }
-      return company;
-    });
-    
-    setCompanies(updatedCompanies);
-    
-    // Simulate API call delay for better UX
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    // Get new pair from updated companies
-    setCurrentPair(getRandomPair(updatedCompanies));
-    setIsVoting(false);
+      
+      // Refresh companies from database to get updated ELO ratings
+      const updatedCompanies = await getCompanies();
+      setCompanies(updatedCompanies);
+      
+      // Get new pair from updated companies
+      setCurrentPair(getRandomPair(updatedCompanies));
+      
+    } catch (error) {
+      console.error('Error processing vote:', error);
+    } finally {
+      setIsVoting(false);
+    }
   };
 
   if (!currentPair) {

@@ -1,4 +1,6 @@
-import { getCompanies } from "@/data/companies";
+import { useState, useEffect } from "react";
+import { getCompanies, Company } from "@/data/companies";
+import { supabaseApi } from "@/lib/supabase";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PayStats } from "@/components/ui/pay-stats";
@@ -6,7 +8,33 @@ import { Star, Trophy, Medal, Award } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Leaderboard = () => {
-  const companies = getCompanies();
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadLeaderboard = async () => {
+      try {
+        const companiesData = await getCompanies();
+        setCompanies(companiesData);
+      } catch (error) {
+        console.error('Failed to load leaderboard:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadLeaderboard();
+
+    // Set up real-time subscription for company updates
+    const channel = supabaseApi.subscribeToCompanyUpdates(() => {
+      // Refresh leaderboard when companies are updated
+      loadLeaderboard();
+    });
+
+    return () => {
+      channel.unsubscribe();
+    };
+  }, []);
   const getRankIcon = (rank: number) => {
     switch (rank) {
       case 1:
@@ -33,6 +61,17 @@ const Leaderboard = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mb-4"></div>
+          <p className="text-muted-foreground">Loading leaderboard...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-4xl mx-auto px-4 py-8">
@@ -41,7 +80,7 @@ const Leaderboard = () => {
             SWE Internship Leaderboard
           </h1>
           <p className="text-muted-foreground">
-            Rankings based on student votes using chess ELO rating system
+            Rankings based on student votes using chess ELO rating system • Live updates
           </p>
         </div>
 

@@ -1,5 +1,6 @@
 import { useParams, Link } from "react-router-dom";
-import { getCompanies } from "@/data/companies";
+import { getCompanies, Company } from "@/data/companies";
+import { supabaseApi } from "@/lib/supabase";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,9 +14,13 @@ import { useState, useEffect } from "react";
 import { getEloHistory, EloHistoryEntry } from "@/utils/elo";
 
 const CompanyDetails = () => {
-  const companies = getCompanies();
+  console.log('CompanyDetails component rendering...');
+  
   const { id } = useParams();
-  const company = companies.find(c => c.id === parseInt(id || ""));
+  console.log('Company ID from params:', id);
+  
+  const [company, setCompany] = useState<Company | null>(null);
+  const [loading, setLoading] = useState(true);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [eloHistory, setEloHistory] = useState<EloHistoryEntry[]>([]);
   const [newReview, setNewReview] = useState({
@@ -27,17 +32,54 @@ const CompanyDetails = () => {
   });
 
   useEffect(() => {
-    if (company) {
-      const history = getEloHistory(company.id);
-      setEloHistory(history);
-    }
-  }, [company]);
+    console.log('CompanyDetails useEffect triggered with id:', id);
+    
+    const loadCompany = async () => {
+      try {
+        console.log('Loading companies...');
+        const companies = await getCompanies();
+        console.log('Companies loaded:', companies.length, 'companies');
+        
+        const foundCompany = companies.find(c => c.id === parseInt(id || ""));
+        console.log('Found company:', foundCompany?.name || 'Not found');
+        
+        setCompany(foundCompany || null);
+        
+        if (foundCompany) {
+          const history = getEloHistory(foundCompany.id);
+          setEloHistory(history);
+        }
+      } catch (error) {
+        console.error('Failed to load company details:', error);
+      } finally {
+        console.log('Setting loading to false');
+        setLoading(false);
+      }
+    };
 
-  if (!company) {
+    loadCompany();
+  }, [id]);
+
+  console.log('Rendering state - loading:', loading, 'company:', company?.name || 'null');
+
+  if (loading) {
+    console.log('Rendering loading state');
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-2">Company not found</h1>
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mb-4"></div>
+          <p className="text-muted-foreground">Loading company details... (ID: {id})</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!company) {
+    console.log('Rendering company not found state');
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-foreground mb-2">Company not found (ID: {id})</h1>
           <Link to="/leaderboard">
             <Button variant="outline">Back to Leaderboard</Button>
           </Link>
@@ -46,18 +88,51 @@ const CompanyDetails = () => {
     );
   }
 
-  const handleSubmitReview = (e: React.FormEvent) => {
+  console.log('Rendering company details for:', company.name);
+
+  const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, this would submit to an API
-    console.log("Review submitted:", newReview);
-    setShowReviewForm(false);
-    setNewReview({
-      rating: 5,
-      content: "",
-      author: "",
-      program: "",
-      year: ""
-    });
+    
+    if (!company) return;
+    
+    try {
+      const reviewData = {
+        company_id: company.id,
+        rating: newReview.rating,
+        content: newReview.content,
+        program: newReview.program || null,
+        year: newReview.year || null,
+        is_anonymous: !newReview.author
+      };
+      
+      const { error } = await supabaseApi.createReview(reviewData);
+      
+      if (error) {
+        console.error('Failed to submit review:', error);
+        // You could add a toast notification here
+        return;
+      }
+      
+      console.log("Review submitted successfully!");
+      setShowReviewForm(false);
+      setNewReview({
+        rating: 5,
+        content: "",
+        author: "",
+        program: "",
+        year: ""
+      });
+      
+      // Refresh company data to show new review
+      const companies = await getCompanies();
+      const updatedCompany = companies.find(c => c.id === company.id);
+      if (updatedCompany) {
+        setCompany(updatedCompany);
+      }
+      
+    } catch (error) {
+      console.error('Error submitting review:', error);
+    }
   };
 
   const renderStars = (rating: number, interactive = false, onChange?: (rating: number) => void) => {

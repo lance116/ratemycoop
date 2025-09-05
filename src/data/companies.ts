@@ -1266,27 +1266,54 @@ export const baseCompanies: Company[] = [
   }
 ];
 
-import { getStoredRatings, getEloHistory, updateEloHistory } from '@/utils/elo';
+import { supabaseApi } from '@/lib/supabase';
 
-export const getCompanies = (): Company[] => {
-  const storedRatings = getStoredRatings();
-  
-  return baseCompanies
-    .map(company => {
-      const currentElo = storedRatings[company.id] || company.elo;
-      
-      // Initialize ELO history if it doesn't exist
-      const history = getEloHistory(company.id);
-      if (history.length === 0) {
-        updateEloHistory(company.id, currentElo);
-      }
-      
-      return {
-        ...company,
-        elo: currentElo
-      };
-    })
-    .sort((a, b) => b.elo - a.elo);
+// Transform database company to match interface
+const transformDatabaseCompany = (dbCompany: any): Company => ({
+  id: dbCompany.id,
+  name: dbCompany.name,
+  logo: dbCompany.logo_url || '',
+  rating: dbCompany.average_rating || 0,
+  elo: dbCompany.current_elo || 1600,
+  reviews: dbCompany.reviews || [],
+  tags: dbCompany.tags || [],
+  description: dbCompany.description || '',
+  pay: dbCompany.pay_range || undefined
+});
+
+// ASYNC function to get companies from Supabase
+export const getCompanies = async (): Promise<Company[]> => {
+  try {
+    console.log('Fetching companies from Supabase...');
+    const { data, error } = await supabaseApi.getCompaniesLeaderboard();
+    
+    if (error) {
+      console.error('Failed to fetch companies from Supabase:', error);
+      console.log('Falling back to base companies');
+      // Fall back to base companies if database fails
+      return baseCompanies;
+    }
+    
+    if (data && data.length > 0) {
+      console.log(`Successfully fetched ${data.length} companies from Supabase`);
+      return data.map(transformDatabaseCompany);
+    } else {
+      console.log('No data returned from Supabase, using base companies');
+      return baseCompanies;
+    }
+  } catch (err) {
+    console.error('Error fetching companies:', err);
+    console.log('Using base companies as fallback');
+    return baseCompanies;
+  }
 };
 
-export const companies = getCompanies();
+// DEPRECATED: Synchronous version for backward compatibility
+// This will return baseCompanies and log a warning
+export const getCompanieSync = (): Company[] => {
+  console.warn('getCompanieSync is deprecated. Use async getCompanies() instead.');
+  return baseCompanies;
+};
+
+// For backward compatibility, provide a synchronous fallback
+export const companies = baseCompanies;

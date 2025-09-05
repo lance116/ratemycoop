@@ -1,4 +1,6 @@
-// Chess ELO rating system implementation
+import { supabaseApi } from '@/lib/supabase';
+
+// Chess ELO rating system implementation (kept for reference, now handled by database)
 export const calculateEloChange = (winnerRating: number, loserRating: number, kFactor: number = 32): { winnerNewRating: number; loserNewRating: number } => {
   // Expected score calculation
   const expectedScoreWinner = 1 / (1 + Math.pow(10, (loserRating - winnerRating) / 400));
@@ -19,32 +21,31 @@ export interface EloHistoryEntry {
   elo: number;
 }
 
-// Store ELO ratings in localStorage for persistence
+// DEPRECATED: These functions are kept for backward compatibility but now use Supabase
+// New implementations use the database instead of localStorage
+
 export const getStoredRatings = (): Record<number, number> => {
+  console.warn('getStoredRatings is deprecated. Use Supabase database instead.');
   const stored = localStorage.getItem('company-elos');
   return stored ? JSON.parse(stored) : {};
 };
 
-export const updateStoredRating = (companyId: number, newRating: number): void => {
+export const updateStoredRating = async (companyId: number, newRating: number): Promise<void> => {
+  console.warn('updateStoredRating is deprecated. Use supabaseApi.processVote instead.');
+  // Keep localStorage as fallback for now
   const stored = getStoredRatings();
-  const oldRating = stored[companyId] || 1600;
-  
   stored[companyId] = newRating;
   localStorage.setItem('company-elos', JSON.stringify(stored));
-  
-  // Only update history if there's a significant change (5+ points) to reduce storage
-  const change = Math.abs(newRating - oldRating);
-  if (change >= 5) {
-    updateEloHistory(companyId, newRating);
-  }
 };
 
 export const getEloHistory = (companyId: number): EloHistoryEntry[] => {
+  console.warn('getEloHistory is deprecated. Fetch from Supabase elo_history table instead.');
   const stored = localStorage.getItem(`company-elo-history-${companyId}`);
   return stored ? JSON.parse(stored) : [];
 };
 
 export const updateEloHistory = (companyId: number, elo: number): void => {
+  console.warn('updateEloHistory is deprecated. Database triggers handle this automatically.');
   const history = getEloHistory(companyId);
   const newEntry: EloHistoryEntry = {
     timestamp: Date.now(),
@@ -59,9 +60,27 @@ export const updateEloHistory = (companyId: number, elo: number): void => {
 };
 
 export const resetAllRatings = (): void => {
+  console.warn('resetAllRatings is deprecated. Database handles ratings persistence.');
   localStorage.removeItem('company-elos');
   // Clear all history
   for (let i = 1; i <= 113; i++) {
     localStorage.removeItem(`company-elo-history-${i}`);
   }
+};
+
+// NEW SUPABASE-BASED FUNCTIONS
+
+// Process a vote using Supabase
+export const processVote = async (winnerId: number, loserId: number, userId?: string) => {
+  return await supabaseApi.processVote(winnerId, loserId, userId);
+};
+
+// Get companies from database
+export const getCompaniesFromDB = async () => {
+  return await supabaseApi.getCompaniesLeaderboard();
+};
+
+// Get random company pair for voting
+export const getRandomCompanyPair = async () => {
+  return await supabaseApi.getRandomCompanyPair();
 };
