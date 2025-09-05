@@ -1284,26 +1284,21 @@ const transformDatabaseCompany = (dbCompany: any): Company => ({
 // ASYNC function to get companies from Supabase
 export const getCompanies = async (): Promise<Company[]> => {
   try {
-    console.log('Fetching companies from Supabase...');
     const { data, error } = await supabaseApi.getCompaniesLeaderboard();
     
     if (error) {
-      console.error('Failed to fetch companies from Supabase:', error);
-      console.log('Falling back to base companies');
-      // Fall back to base companies if database fails
+      console.warn('Failed to fetch companies from Supabase, using fallback:', error.message);
       return baseCompanies;
     }
     
     if (data && data.length > 0) {
-      console.log(`Successfully fetched ${data.length} companies from Supabase`);
       return data.map(transformDatabaseCompany);
     } else {
-      console.log('No data returned from Supabase, using base companies');
+      console.warn('No data returned from Supabase, using base companies');
       return baseCompanies;
     }
   } catch (err) {
-    console.error('Error fetching companies:', err);
-    console.log('Using base companies as fallback');
+    console.warn('Error fetching companies, using fallback:', err);
     return baseCompanies;
   }
 };

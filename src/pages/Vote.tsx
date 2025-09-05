@@ -18,18 +18,31 @@ const Vote = () => {
       try {
         const loadedCompanies = await getCompanies();
         setCompanies(loadedCompanies);
-        setCurrentPair(getRandomPair(loadedCompanies));
+        const pair = getRandomPair(loadedCompanies);
+        if (pair) {
+          setCurrentPair(pair);
+        }
       } catch (error) {
         console.error('Failed to load companies:', error);
       }
     };
     
     loadCompanies();
+  }, []);
 
+  useEffect(() => {
     // Set up real-time subscription for company updates
     const channel = supabaseApi.subscribeToCompanyUpdates((payload) => {
       // Refresh companies when ELO ratings change from other users' votes
       if (!isVoting) { // Don't refresh during our own vote process
+        const loadCompanies = async () => {
+          try {
+            const loadedCompanies = await getCompanies();
+            setCompanies(loadedCompanies);
+          } catch (error) {
+            console.error('Failed to refresh companies:', error);
+          }
+        };
         loadCompanies();
       }
     });
@@ -40,13 +53,28 @@ const Vote = () => {
   }, [isVoting]);
 
   const getRandomPair = (companiesList: Company[]) => {
+    if (companiesList.length < 2) {
+      console.warn('Not enough companies for a pair');
+      return null;
+    }
+    
     const shuffled = [...companiesList].sort(() => 0.5 - Math.random());
-    return [shuffled[0], shuffled[1]] as [Company, Company];
+    // Ensure we get two different companies
+    let company1 = shuffled[0];
+    let company2 = shuffled[1];
+    
+    // If by chance they're the same, find a different one
+    if (company1.id === company2.id && companiesList.length > 1) {
+      company2 = shuffled.find(c => c.id !== company1.id) || shuffled[2] || shuffled[1];
+    }
+    
+    return [company1, company2] as [Company, Company];
   };
 
   const handleVote = async (winner: Company) => {
     if (isVoting || !currentPair) return;
     
+    console.log('Processing vote for:', winner.name);
     setIsVoting(true);
     setVotes(votes + 1);
     
@@ -56,10 +84,13 @@ const Vote = () => {
     try {
       // Process vote using Supabase
       const { error } = await processVote(winner.id, loser.id);
+      console.log('Vote processed, error:', error);
       
       if (error) {
         console.error('Failed to process vote:', error);
-        setIsVoting(false);
+        // Still generate new pair even if vote fails
+        const fallbackPair = getRandomPair(companies);
+        if (fallbackPair) setCurrentPair(fallbackPair);
         return;
       }
       
@@ -68,10 +99,17 @@ const Vote = () => {
       setCompanies(updatedCompanies);
       
       // Get new pair from updated companies
-      setCurrentPair(getRandomPair(updatedCompanies));
+      const newPair = getRandomPair(updatedCompanies);
+      console.log('Generated new pair:', newPair ? `${newPair[0].name} vs ${newPair[1].name}` : 'null');
+      if (newPair) {
+        setCurrentPair(newPair);
+      }
       
     } catch (error) {
       console.error('Error processing vote:', error);
+      // Fallback: generate new pair from current companies
+      const fallbackPair = getRandomPair(companies);
+      if (fallbackPair) setCurrentPair(fallbackPair);
     } finally {
       setIsVoting(false);
     }

@@ -24,7 +24,8 @@ export const testSupabaseConnection = async () => {
   }
 };
 
-// Auto-run test in development
-if (import.meta.env.DEV) {
+// Auto-run test in development (only once)
+if (import.meta.env.DEV && !globalThis.__supabaseTestRun) {
+  globalThis.__supabaseTestRun = true;
   testSupabaseConnection();
 }

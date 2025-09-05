@@ -8,7 +8,6 @@ import Vote from "./pages/Vote";
 import Leaderboard from "./pages/Leaderboard";
 import Reviews from "./pages/Reviews";
 import CompanyDetails from "./pages/CompanyDetails";
-import CompanyDetailsDebug from "./pages/CompanyDetailsDebug";
 import NotFound from "./pages/NotFound";
 import "./lib/supabase-test"; // Test Supabase connection on startup
 
@@ -25,7 +24,7 @@ const App = () => (
           <Route path="/" element={<Vote />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/reviews" element={<Reviews />} />
-          <Route path="/company/:id" element={<CompanyDetailsDebug />} />
+          <Route path="/company/:id" element={<CompanyDetails />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

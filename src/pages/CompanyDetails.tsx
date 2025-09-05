@@ -14,11 +14,7 @@ import { useState, useEffect } from "react";
 import { getEloHistory, EloHistoryEntry } from "@/utils/elo";
 
 const CompanyDetails = () => {
-  console.log('CompanyDetails component rendering...');
-  
   const { id } = useParams();
-  console.log('Company ID from params:', id);
-  
   const [company, setCompany] = useState<Company | null>(null);
   const [loading, setLoading] = useState(true);
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -32,17 +28,18 @@ const CompanyDetails = () => {
   });
 
   useEffect(() => {
-    console.log('CompanyDetails useEffect triggered with id:', id);
+    if (!id) return;
+    
+    let isMounted = true;
     
     const loadCompany = async () => {
       try {
-        console.log('Loading companies...');
+        setLoading(true);
         const companies = await getCompanies();
-        console.log('Companies loaded:', companies.length, 'companies');
         
-        const foundCompany = companies.find(c => c.id === parseInt(id || ""));
-        console.log('Found company:', foundCompany?.name || 'Not found');
+        if (!isMounted) return;
         
+        const foundCompany = companies.find(c => c.id === parseInt(id));
         setCompany(foundCompany || null);
         
         if (foundCompany) {
@@ -52,34 +49,35 @@ const CompanyDetails = () => {
       } catch (error) {
         console.error('Failed to load company details:', error);
       } finally {
-        console.log('Setting loading to false');
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     loadCompany();
+    
+    return () => {
+      isMounted = false;
+    };
   }, [id]);
 
-  console.log('Rendering state - loading:', loading, 'company:', company?.name || 'null');
-
   if (loading) {
-    console.log('Rendering loading state');
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mb-4"></div>
-          <p className="text-muted-foreground">Loading company details... (ID: {id})</p>
+          <p className="text-muted-foreground">Loading company details...</p>
         </div>
       </div>
     );
   }
 
   if (!company) {
-    console.log('Rendering company not found state');
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-2">Company not found (ID: {id})</h1>
+          <h1 className="text-2xl font-bold text-foreground mb-2">Company not found</h1>
           <Link to="/leaderboard">
             <Button variant="outline">Back to Leaderboard</Button>
           </Link>
@@ -87,8 +85,6 @@ const CompanyDetails = () => {
       </div>
     );
   }
-
-  console.log('Rendering company details for:', company.name);
 
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
