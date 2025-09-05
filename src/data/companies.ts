@@ -167,7 +167,7 @@ export const baseCompanies: Company[] = [
   {
     id: 14,
     name: "Palantir",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/6/6a/Palantir_Technologies_logo.svg",
+    logo: "/palantir.png",
     rating: 0,
     elo: 1600,
     description: "Big data analytics and software solutions",
@@ -178,7 +178,7 @@ export const baseCompanies: Company[] = [
   {
     id: 15,
     name: "Snowflake",
-    logo: "https://upload.wikimedia.org/wikipedia/en/4/4b/Snowflake_Logo.svg",
+    logo: "/snowflake.png",
     rating: 0,
     elo: 1600,
     description: "Cloud data platform company",
@@ -189,7 +189,7 @@ export const baseCompanies: Company[] = [
   {
     id: 16,
     name: "Coinbase",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/1/1a/Coinbase_Logo_2016.svg",
+    logo: "/coinbase.png",
     rating: 0,
     elo: 1600,
     description: "Cryptocurrency exchange platform",
@@ -266,7 +266,7 @@ export const baseCompanies: Company[] = [
   {
     id: 23,
     name: "Adobe",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/8/8d/Adobe_Corporate_Logo.svg",
+    logo: "/adobe.png",
     rating: 0,
     elo: 1600,
     description: "Digital media and creativity software",
@@ -277,7 +277,7 @@ export const baseCompanies: Company[] = [
   {
     id: 24,
     name: "MongoDB",
-    logo: "https://upload.wikimedia.org/wikipedia/en/4/45/MongoDB-Logo.svg",
+    logo: "/mongo.png",
     rating: 0,
     elo: 1600,
     description: "Document database platform",
@@ -288,7 +288,7 @@ export const baseCompanies: Company[] = [
   {
     id: 25,
     name: "Roblox",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/2/21/Roblox_Logo_2022.svg",
+    logo: "/roblox.png",
     rating: 0,
     elo: 1600,
     description: "Online game platform and creation system",
@@ -354,7 +354,7 @@ export const baseCompanies: Company[] = [
   {
     id: 31,
     name: "Dell Technologies",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/1/04/Dell_Logo.svg",
+    logo: "/dell.png",
     rating: 0,
     elo: 1600,
     description: "Computer technology and infrastructure solutions",
@@ -376,7 +376,7 @@ export const baseCompanies: Company[] = [
   {
     id: 33,
     name: "Qualcomm",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/9/9e/Qualcomm-Logo.svg",
+    logo: "/qualcomm.png",
     rating: 0,
     elo: 1600,
     description: "Wireless technology and semiconductor company",
@@ -409,7 +409,7 @@ export const baseCompanies: Company[] = [
   {
     id: 36,
     name: "LG Electronics",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/2/20/Logo_of_LG.svg",
+    logo: "/LG.png",
     rating: 0,
     elo: 1600,
     description: "Consumer electronics and home appliances",
@@ -442,7 +442,7 @@ export const baseCompanies: Company[] = [
   {
     id: 39,
     name: "ByteDance",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/4/4a/ByteDance_logo.svg",
+    logo: "/tiktok.png",
     rating: 0,
     elo: 1600,
     description: "Social media and content platform company",
@@ -486,7 +486,7 @@ export const baseCompanies: Company[] = [
   {
     id: 43,
     name: "Huawei",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/8/81/Huawei_Standard_logo.svg",
+    logo: "/huawei.png",
     rating: 0,
     elo: 1600,
     description: "Chinese telecommunications and technology company",
