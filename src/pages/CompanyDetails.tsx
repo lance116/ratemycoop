@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { LineChart } from "@/components/ui/line-chart";
+import { PayStats } from "@/components/ui/pay-stats";
 import { Star, ArrowLeft, MessageSquare, Trophy, TrendingUp, BarChart3 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { getEloHistory, EloHistoryEntry } from "@/utils/elo";
@@ -116,7 +117,7 @@ const CompanyDetails = () => {
                     </Badge>
                   ))}
                 </div>
-                <div className="grid grid-cols-2 gap-4 text-center">
+                <div className="grid grid-cols-3 gap-4 text-center">
                   <div>
                     <div className="flex items-center justify-center space-x-1">
                       <Trophy className="h-5 w-5 text-primary" />
@@ -134,6 +135,12 @@ const CompanyDetails = () => {
                       </span>
                     </div>
                     <span className="text-sm text-muted-foreground">Reviews</span>
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-center">
+                      <PayStats pay={company.pay} className="text-lg" />
+                    </div>
+                    <span className="text-sm text-muted-foreground">Pay Rate</span>
                   </div>
                 </div>
               </div>

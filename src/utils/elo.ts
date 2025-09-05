@@ -61,7 +61,7 @@ export const updateEloHistory = (companyId: number, elo: number): void => {
 export const resetAllRatings = (): void => {
   localStorage.removeItem('company-elos');
   // Clear all history
-  for (let i = 1; i <= 25; i++) {
+  for (let i = 1; i <= 113; i++) {
     localStorage.removeItem(`company-elo-history-${i}`);
   }
 };

@@ -1,6 +1,7 @@
 import { getCompanies } from "@/data/companies";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { PayStats } from "@/components/ui/pay-stats";
 import { Star, Trophy, Medal, Award } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -99,6 +100,9 @@ const Leaderboard = () => {
                         </div>
                         <div className="text-sm text-muted-foreground mb-1">
                           ELO Rating
+                        </div>
+                        <div className="mb-1">
+                          <PayStats pay={company.pay} />
                         </div>
                         <div className="text-xs text-muted-foreground">
                           {company.reviews.length} reviews

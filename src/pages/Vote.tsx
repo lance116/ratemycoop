@@ -3,6 +3,7 @@ import { getCompanies, Company } from "@/data/companies";
 import { calculateEloChange, updateStoredRating } from "@/utils/elo";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { PayStats } from "@/components/ui/pay-stats";
 import { Star, Trophy } from "lucide-react";
 
 const Vote = () => {
@@ -103,7 +104,7 @@ const Vote = () => {
                 <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
                   {leftCompany.description}
                 </p>
-                <div className="flex items-center justify-center space-x-1 mb-3">
+                <div className="flex items-center justify-center space-x-1 mb-2">
                   <Trophy className="h-4 w-4 text-primary" />
                   <span className="font-semibold text-foreground text-sm">
                     {leftCompany.elo}
@@ -111,6 +112,9 @@ const Vote = () => {
                   <span className="text-muted-foreground text-xs">
                     ELO
                   </span>
+                </div>
+                <div className="flex justify-center mb-3">
+                  <PayStats pay={leftCompany.pay} />
                 </div>
                 <div className="flex flex-wrap gap-1 justify-center mb-4">
                   {leftCompany.tags.slice(0, 2).map((tag) => (
@@ -149,7 +153,7 @@ const Vote = () => {
                 <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
                   {rightCompany.description}
                 </p>
-                <div className="flex items-center justify-center space-x-1 mb-3">
+                <div className="flex items-center justify-center space-x-1 mb-2">
                   <Trophy className="h-4 w-4 text-primary" />
                   <span className="font-semibold text-foreground text-sm">
                     {rightCompany.elo}
@@ -157,6 +161,9 @@ const Vote = () => {
                   <span className="text-muted-foreground text-xs">
                     ELO
                   </span>
+                </div>
+                <div className="flex justify-center mb-3">
+                  <PayStats pay={rightCompany.pay} />
                 </div>
                 <div className="flex flex-wrap gap-1 justify-center mb-4">
                   {rightCompany.tags.slice(0, 2).map((tag) => (
