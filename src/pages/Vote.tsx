@@ -35,9 +35,10 @@ const Vote = () => {
     // Calculate new ELO ratings
     const { winnerNewRating, loserNewRating } = calculateEloChange(winner.elo, loser.elo);
     
-    // Update stored ratings
-    updateStoredRating(winner.id, winnerNewRating);
-    updateStoredRating(loser.id, loserNewRating);
+    // Update stored ratings with current company rankings
+    const sortedCompanies = [...companies].sort((a, b) => b.elo - a.elo);
+    updateStoredRating(winner.id, winnerNewRating, sortedCompanies);
+    updateStoredRating(loser.id, loserNewRating, sortedCompanies);
     
     // Update local company list with new ratings
     const updatedCompanies = companies.map(company => {

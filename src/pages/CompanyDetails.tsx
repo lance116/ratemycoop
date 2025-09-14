@@ -10,7 +10,7 @@ import { LineChart } from "@/components/ui/line-chart";
 import { PayStats } from "@/components/ui/pay-stats";
 import { Star, ArrowLeft, MessageSquare, Trophy, TrendingUp, BarChart3 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { getEloHistory, EloHistoryEntry } from "@/utils/elo";
+import { getEloHistory, EloHistoryEntry, addReview, getPeakRank } from "@/utils/elo";
 
 const CompanyDetails = () => {
   const companies = getCompanies();
@@ -48,8 +48,21 @@ const CompanyDetails = () => {
 
   const handleSubmitReview = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, this would submit to an API
-    console.log("Review submitted:", newReview);
+    
+    if (company) {
+      // Add the review to local storage
+      addReview(company.id, {
+        author: newReview.author || "Anonymous",
+        rating: newReview.rating,
+        content: newReview.content,
+        program: newReview.program,
+        year: newReview.year
+      });
+      
+      // Refresh the page to show the new review
+      window.location.reload();
+    }
+    
     setShowReviewForm(false);
     setNewReview({
       rating: 5,
@@ -117,7 +130,7 @@ const CompanyDetails = () => {
                     </Badge>
                   ))}
                 </div>
-                <div className="grid grid-cols-3 gap-4 text-center">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                   <div>
                     <div className="flex items-center justify-center space-x-1">
                       <Trophy className="h-5 w-5 text-primary" />
@@ -126,6 +139,15 @@ const CompanyDetails = () => {
                       </span>
                     </div>
                     <span className="text-sm text-muted-foreground">ELO Rating</span>
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-center space-x-1">
+                      <Star className="h-5 w-5 text-primary" />
+                      <span className="text-2xl font-bold text-foreground">
+                        {company.rating > 0 ? company.rating.toFixed(1) : 'N/A'}
+                      </span>
+                    </div>
+                    <span className="text-sm text-muted-foreground">Overall Rating</span>
                   </div>
                   <div>
                     <div className="flex items-center justify-center space-x-1">
@@ -169,19 +191,36 @@ const CompanyDetails = () => {
                   className="mx-auto"
                 />
                 
-                {/* Peak and Lowest Ratings */}
+                {/* Peak and Current Ratings with Ranks */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="text-center p-6 bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-lg border border-green-200 dark:border-green-800">
                     <div className="text-3xl font-bold text-green-600 dark:text-green-400">
-                      {Math.max(...eloHistory.map(h => h.elo))}
+                      {company.elo}
                     </div>
-                    <div className="text-sm text-green-600 dark:text-green-400 font-medium">Peak Rating</div>
+                    <div className="text-sm text-green-600 dark:text-green-400 font-medium">Current Rating</div>
+                    <div className="text-xs text-green-500 dark:text-green-300 mt-1">Current Rank: #{rank}</div>
                   </div>
-                  <div className="text-center p-6 bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 rounded-lg border border-red-200 dark:border-red-800">
-                    <div className="text-3xl font-bold text-red-600 dark:text-red-400">
-                      {Math.min(...eloHistory.map(h => h.elo))}
+                  <div className="text-center p-6 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                      {eloHistory.length > 0 ? Math.max(...eloHistory.map(h => h.elo)) : company.elo}
                     </div>
-                    <div className="text-sm text-red-600 dark:text-red-400 font-medium">Lowest Rating</div>
+                    <div className="text-sm text-blue-600 dark:text-blue-400 font-medium">Peak Rating</div>
+                    <div className="text-xs text-blue-500 dark:text-blue-300 mt-1">
+                      Peak Rank: #{(() => {
+                        if (eloHistory.length === 0) return rank;
+                        
+                        const peakElo = Math.max(...eloHistory.map(h => h.elo));
+                        const currentElo = company.elo;
+                        
+                        // If current ELO is the peak ELO, use current rank
+                        if (currentElo >= peakElo) {
+                          return rank;
+                        }
+                        
+                        // Otherwise, use the stored peak rank
+                        return getPeakRank(company.id);
+                      })()}
+                    </div>
                   </div>
                 </div>
               </div>

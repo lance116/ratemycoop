@@ -1266,27 +1266,37 @@ export const baseCompanies: Company[] = [
   }
 ];
 
-import { getStoredRatings, getEloHistory, updateEloHistory } from '@/utils/elo';
+import { getStoredRatings, getEloHistory, updateEloHistory, getCompanyReviews, calculateOverallRating } from '@/utils/elo';
 
 export const getCompanies = (): Company[] => {
   const storedRatings = getStoredRatings();
   
-  return baseCompanies
-    .map(company => {
-      const currentElo = storedRatings[company.id] || company.elo;
-      
-      // Initialize ELO history if it doesn't exist
-      const history = getEloHistory(company.id);
-      if (history.length === 0) {
-        updateEloHistory(company.id, currentElo);
-      }
-      
-      return {
-        ...company,
-        elo: currentElo
-      };
-    })
-    .sort((a, b) => b.elo - a.elo);
+  // First, create all companies with their current ELO ratings
+  const companiesWithElo = baseCompanies.map(company => {
+    const currentElo = storedRatings[company.id] || company.elo;
+    const reviews = getCompanyReviews(company.id);
+    const overallRating = calculateOverallRating(reviews);
+    
+    return {
+      ...company,
+      elo: currentElo,
+      rating: overallRating,
+      reviews: reviews
+    };
+  });
+  
+  // Sort by ELO to get proper rankings
+  const sortedCompanies = companiesWithElo.sort((a, b) => b.elo - a.elo);
+  
+  // Now initialize ELO history for companies that don't have it, using the sorted order
+  sortedCompanies.forEach(company => {
+    const history = getEloHistory(company.id);
+    if (history.length === 0) {
+      updateEloHistory(company.id, company.elo, sortedCompanies);
+    }
+  });
+  
+  return sortedCompanies;
 };
 
 export const companies = getCompanies();

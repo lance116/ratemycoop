@@ -101,6 +101,19 @@ const Leaderboard = () => {
                         <div className="text-sm text-muted-foreground mb-1">
                           ELO Rating
                         </div>
+                        {company.rating > 0 && (
+                          <>
+                            <div className="flex items-center space-x-1 mb-1">
+                              <Star className="h-4 w-4 text-primary" />
+                              <span className="font-semibold text-foreground">
+                                {company.rating.toFixed(1)}
+                              </span>
+                            </div>
+                            <div className="text-sm text-muted-foreground mb-1">
+                              Overall Rating
+                            </div>
+                          </>
+                        )}
                         <div className="mb-1">
                           <PayStats pay={company.pay} />
                         </div>
