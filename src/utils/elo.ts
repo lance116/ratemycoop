@@ -92,6 +92,8 @@ export interface Review {
   pay: number; // Hourly pay in dollars
   culture: number; // Culture rating out of 10
   prestige: number; // Prestige rating out of 10
+  likes: number; // Number of likes
+  likedBy: string[]; // Array of user IDs who liked this review
 }
 
 export const getStoredReviews = (): Record<number, Review[]> => {
@@ -99,14 +101,16 @@ export const getStoredReviews = (): Record<number, Review[]> => {
   return stored ? JSON.parse(stored) : {};
 };
 
-export const addReview = (companyId: number, review: Omit<Review, 'id' | 'date'>): void => {
+export const addReview = (companyId: number, review: Omit<Review, 'id' | 'date' | 'likes' | 'likedBy'>): void => {
   const stored = getStoredReviews();
   const companyReviews = stored[companyId] || [];
   
   const newReview: Review = {
     ...review,
     id: Date.now(), // Simple ID generation
-    date: new Date().toLocaleDateString()
+    date: new Date().toLocaleDateString(),
+    likes: 0,
+    likedBy: []
   };
   
   companyReviews.push(newReview);
@@ -117,6 +121,39 @@ export const addReview = (companyId: number, review: Omit<Review, 'id' | 'date'>
 export const getCompanyReviews = (companyId: number): Review[] => {
   const stored = getStoredReviews();
   return stored[companyId] || [];
+};
+
+export const toggleReviewLike = (companyId: number, reviewId: number, userId: string): void => {
+  const stored = getStoredReviews();
+  const companyReviews = stored[companyId] || [];
+  
+  const reviewIndex = companyReviews.findIndex(review => review.id === reviewId);
+  if (reviewIndex === -1) return;
+  
+  const review = companyReviews[reviewIndex];
+  
+  // Initialize likedBy array if it doesn't exist
+  if (!review.likedBy) {
+    review.likedBy = [];
+  }
+  if (review.likes === undefined) {
+    review.likes = 0;
+  }
+  
+  const isLiked = review.likedBy.includes(userId);
+  
+  if (isLiked) {
+    // Unlike
+    review.likedBy = review.likedBy.filter(id => id !== userId);
+    review.likes = Math.max(0, review.likes - 1);
+  } else {
+    // Like
+    review.likedBy.push(userId);
+    review.likes += 1;
+  }
+  
+  stored[companyId] = companyReviews;
+  localStorage.setItem('company-reviews', JSON.stringify(stored));
 };
 
 export const calculateOverallRating = (reviews: Review[]): number => {

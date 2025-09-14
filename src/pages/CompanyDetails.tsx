@@ -8,9 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { LineChart } from "@/components/ui/line-chart";
 import { PayStats } from "@/components/ui/pay-stats";
-import { Star, ArrowLeft, MessageSquare, Trophy, TrendingUp, BarChart3 } from "lucide-react";
+import { Star, ArrowLeft, MessageSquare, Trophy, TrendingUp, BarChart3, Heart } from "lucide-react";
 import { useState, useEffect } from "react";
-import { getEloHistory, EloHistoryEntry, addReview, getPeakRank } from "@/utils/elo";
+import { getEloHistory, EloHistoryEntry, addReview, getPeakRank, toggleReviewLike } from "@/utils/elo";
 
 const CompanyDetails = () => {
   const companies = getCompanies();
@@ -27,6 +27,16 @@ const CompanyDetails = () => {
     pay: 0,
     culture: 5,
     prestige: 5
+  });
+
+  // Simple user ID system (in a real app, this would come from authentication)
+  const [userId] = useState(() => {
+    let stored = localStorage.getItem('user-id');
+    if (!stored) {
+      stored = `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      localStorage.setItem('user-id', stored);
+    }
+    return stored;
   });
 
   useEffect(() => {
@@ -118,6 +128,15 @@ const CompanyDetails = () => {
         </div>
       </div>
     );
+  };
+
+  const handleLikeReview = (reviewId: number) => {
+    if (company) {
+      console.log('Liking review:', reviewId, 'for company:', company.id, 'user:', userId);
+      toggleReviewLike(company.id, reviewId, userId);
+      // Refresh the page to show updated likes
+      window.location.reload();
+    }
   };
 
   const rank = companies.indexOf(company) + 1;
@@ -425,18 +444,34 @@ const CompanyDetails = () => {
           {/* Reviews List */}
           <div className="space-y-4">
             {company.reviews.length > 0 ? (
-              [...company.reviews]
-                .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                .map((review) => (
-                <Card key={review.id}>
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <div className="flex items-center space-x-2 mb-1">
-                          {renderStars(review.rating)}
-                          <span className="text-sm text-muted-foreground">
-                            by {review.author || "Anonymous"}
-                          </span>
+              company.reviews
+                .sort((a, b) => {
+                  // Sort by likes first (most liked first), then by date
+                  const likesA = a.likes || 0;
+                  const likesB = b.likes || 0;
+                  
+                  if (likesA !== likesB) {
+                    return likesB - likesA; // Most liked first
+                  }
+                  
+                  return new Date(b.date).getTime() - new Date(a.date).getTime(); // Then by date
+                })
+                .map((review, index) => (
+                  <Card key={review.id} className={index < 3 ? "border-2 border-primary/20 bg-primary/5" : ""}>
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center space-x-2 mb-1">
+                            {renderStars(review.rating)}
+                            <span className="text-sm text-muted-foreground">
+                              by {review.author || "Anonymous"}
+                            </span>
+                            {index < 3 && (
+                              <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs">
+                                Pinned
+                              </Badge>
+                            )}
+                          </div>
                         </div>
                         <div className="text-sm text-muted-foreground">
                           {review.program} • {review.year} • {review.date}
@@ -444,7 +479,7 @@ const CompanyDetails = () => {
                       </div>
                       
                       {/* Review Metrics */}
-                      <div className="flex gap-4 text-right">
+                      <div className="flex gap-4 text-right mb-4">
                         <div>
                           <div className="text-sm font-medium text-foreground">
                             {review.pay && review.pay > 0 ? `$${review.pay}/hr` : 'N/A'}
@@ -464,12 +499,30 @@ const CompanyDetails = () => {
                           <div className="text-xs text-muted-foreground">Prestige</div>
                         </div>
                       </div>
-                    </div>
-                    
-                    <p className="text-foreground">{review.content}</p>
-                  </CardContent>
-                </Card>
-              ))
+                      
+                      <p className="text-foreground mb-4">{review.content}</p>
+                      
+                      {/* Like Button */}
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleLikeReview(review.id)}
+                          className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs transition-colors ${
+                            review.likedBy && review.likedBy.includes && review.likedBy.includes(userId)
+                              ? 'bg-red-100 text-red-600 hover:bg-red-200'
+                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                          }`}
+                        >
+                          <Heart 
+                            className={`h-3 w-3 ${
+                              review.likedBy && review.likedBy.includes && review.likedBy.includes(userId) ? 'fill-current' : ''
+                            }`} 
+                          />
+                          {review.likes || 0}
+                        </button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
             ) : (
               <Card>
                 <CardContent className="p-8 text-center">
