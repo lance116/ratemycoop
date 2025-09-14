@@ -466,11 +466,6 @@ const CompanyDetails = () => {
                             <span className="text-sm text-muted-foreground">
                               by {review.author || "Anonymous"}
                             </span>
-                            {index < 3 && (
-                              <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs">
-                                Pinned
-                              </Badge>
-                            )}
                           </div>
                         </div>
                         <div className="text-sm text-muted-foreground">
