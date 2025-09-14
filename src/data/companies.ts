@@ -8,6 +8,9 @@ export interface Company {
   tags: string[];
   description: string;
   pay?: string;
+  averagePay: number;
+  culture: number;
+  prestige: number;
 }
 
 export interface Review {
@@ -1266,7 +1269,7 @@ export const baseCompanies: Company[] = [
   }
 ];
 
-import { getStoredRatings, getEloHistory, updateEloHistory, getCompanyReviews, calculateOverallRating } from '@/utils/elo';
+import { getStoredRatings, getEloHistory, updateEloHistory, getCompanyReviews, calculateOverallRating, calculateAveragePay, calculateAverageCulture, calculateAveragePrestige } from '@/utils/elo';
 
 export const getCompanies = (): Company[] => {
   const storedRatings = getStoredRatings();
@@ -1274,15 +1277,25 @@ export const getCompanies = (): Company[] => {
   // First, create all companies with their current ELO ratings
   const companiesWithElo = baseCompanies.map(company => {
     const currentElo = storedRatings[company.id] || company.elo;
-    const reviews = getCompanyReviews(company.id);
-    const overallRating = calculateOverallRating(reviews);
-    
-    return {
-      ...company,
-      elo: currentElo,
-      rating: overallRating,
-      reviews: reviews
-    };
+      const reviews = getCompanyReviews(company.id);
+      const overallRating = calculateOverallRating(reviews);
+      const averagePay = calculateAveragePay(reviews);
+      const culture = calculateAverageCulture(reviews);
+      const prestige = calculateAveragePrestige(reviews);
+      
+      // Update pay string based on average pay from reviews
+      const payString = averagePay > 0 ? `$${averagePay}/hr` : company.pay;
+      
+      return {
+        ...company,
+        elo: currentElo,
+        rating: overallRating,
+        reviews: reviews,
+        averagePay: averagePay,
+        culture: culture,
+        prestige: prestige,
+        pay: payString
+      };
   });
   
   // Sort by ELO to get proper rankings

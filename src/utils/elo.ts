@@ -89,6 +89,9 @@ export interface Review {
   date: string;
   program: string;
   year: string;
+  pay: number; // Hourly pay in dollars
+  culture: number; // Culture rating out of 10
+  prestige: number; // Prestige rating out of 10
 }
 
 export const getStoredReviews = (): Record<number, Review[]> => {
@@ -121,6 +124,36 @@ export const calculateOverallRating = (reviews: Review[]): number => {
   
   const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
   return Math.round((totalRating / reviews.length) * 10) / 10; // Round to 1 decimal place
+};
+
+export const calculateAveragePay = (reviews: Review[]): number => {
+  if (reviews.length === 0) return 0;
+  
+  const validReviews = reviews.filter(review => review.pay && !isNaN(review.pay) && review.pay > 0);
+  if (validReviews.length === 0) return 0;
+  
+  const totalPay = validReviews.reduce((sum, review) => sum + review.pay, 0);
+  return Math.round(totalPay / validReviews.length);
+};
+
+export const calculateAverageCulture = (reviews: Review[]): number => {
+  if (reviews.length === 0) return 0;
+  
+  const validReviews = reviews.filter(review => review.culture && !isNaN(review.culture));
+  if (validReviews.length === 0) return 0;
+  
+  const totalCulture = validReviews.reduce((sum, review) => sum + review.culture, 0);
+  return Math.round((totalCulture / validReviews.length) * 10) / 10; // Round to 1 decimal place
+};
+
+export const calculateAveragePrestige = (reviews: Review[]): number => {
+  if (reviews.length === 0) return 0;
+  
+  const validReviews = reviews.filter(review => review.prestige && !isNaN(review.prestige));
+  if (validReviews.length === 0) return 0;
+  
+  const totalPrestige = validReviews.reduce((sum, review) => sum + review.prestige, 0);
+  return Math.round((totalPrestige / validReviews.length) * 10) / 10; // Round to 1 decimal place
 };
 
 export const getPeakRank = (companyId: number): number => {

@@ -23,7 +23,10 @@ const CompanyDetails = () => {
     content: "",
     author: "",
     program: "",
-    year: ""
+    year: "",
+    pay: 0,
+    culture: 5,
+    prestige: 5
   });
 
   useEffect(() => {
@@ -56,7 +59,10 @@ const CompanyDetails = () => {
         rating: newReview.rating,
         content: newReview.content,
         program: newReview.program,
-        year: newReview.year
+        year: newReview.year,
+        pay: newReview.pay,
+        culture: newReview.culture,
+        prestige: newReview.prestige
       });
       
       // Refresh the page to show the new review
@@ -69,7 +75,10 @@ const CompanyDetails = () => {
       content: "",
       author: "",
       program: "",
-      year: ""
+      year: "",
+      pay: 0,
+      culture: 5,
+      prestige: 5
     });
   };
 
@@ -87,6 +96,26 @@ const CompanyDetails = () => {
             onClick={interactive && onChange ? () => onChange(star) : undefined}
           />
         ))}
+      </div>
+    );
+  };
+
+  const renderSlider = (value: number, onChange: (value: number) => void, label: string, max: number = 10) => {
+    return (
+      <div className="space-y-2">
+        <Label>{label}: {value}/10</Label>
+        <input
+          type="range"
+          min="1"
+          max={max}
+          value={value}
+          onChange={(e) => onChange(parseInt(e.target.value))}
+          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+        />
+        <div className="flex justify-between text-xs text-muted-foreground">
+          <span>1</span>
+          <span>{max}</span>
+        </div>
       </div>
     );
   };
@@ -238,6 +267,58 @@ const CompanyDetails = () => {
           </CardContent>
         </Card>
 
+        {/* Culture and Prestige Metrics */}
+        <Card className="mb-8">
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-2 mb-6">
+              <BarChart3 className="h-5 w-5 text-primary" />
+              <h2 className="text-xl font-bold text-foreground">Company Metrics</h2>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Culture */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-foreground">Culture</span>
+                  <span className="text-sm text-muted-foreground">
+                    {isNaN(company.culture) ? 'N/A' : `${company.culture}/10`}
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-3">
+                  <div 
+                    className="bg-blue-500 h-3 rounded-full transition-all duration-300"
+                    style={{ width: `${isNaN(company.culture) ? 0 : (company.culture / 10) * 100}%` }}
+                  ></div>
+                </div>
+                <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                  <span>Poor</span>
+                  <span>Excellent</span>
+                </div>
+              </div>
+
+              {/* Prestige */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-foreground">Prestige</span>
+                  <span className="text-sm text-muted-foreground">
+                    {isNaN(company.prestige) ? 'N/A' : `${company.prestige}/10`}
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-3">
+                  <div 
+                    className="bg-purple-500 h-3 rounded-full transition-all duration-300"
+                    style={{ width: `${isNaN(company.prestige) ? 0 : (company.prestige / 10) * 100}%` }}
+                  ></div>
+                </div>
+                <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                  <span>Low</span>
+                  <span>High</span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Reviews Section */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
@@ -291,6 +372,29 @@ const CompanyDetails = () => {
                     </div>
                   </div>
 
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <Label htmlFor="pay">Hourly Pay ($)</Label>
+                      <Input
+                        id="pay"
+                        type="number"
+                        placeholder="e.g., 25"
+                        value={newReview.pay || ""}
+                        onChange={(e) => setNewReview({ ...newReview, pay: parseInt(e.target.value) || 0 })}
+                      />
+                    </div>
+                    <div>
+                      {renderSlider(newReview.culture, (value) => setNewReview({ ...newReview, culture: value }), "Culture")}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      {renderSlider(newReview.prestige, (value) => setNewReview({ ...newReview, prestige: value }), "Prestige")}
+                    </div>
+                    <div></div>
+                  </div>
+
                   <div>
                     <Label htmlFor="content">Review</Label>
                     <Textarea
@@ -321,7 +425,9 @@ const CompanyDetails = () => {
           {/* Reviews List */}
           <div className="space-y-4">
             {company.reviews.length > 0 ? (
-              company.reviews.map((review) => (
+              [...company.reviews]
+                .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                .map((review) => (
                 <Card key={review.id}>
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-3">
@@ -336,7 +442,30 @@ const CompanyDetails = () => {
                           {review.program} • {review.year} • {review.date}
                         </div>
                       </div>
+                      
+                      {/* Review Metrics */}
+                      <div className="flex gap-4 text-right">
+                        <div>
+                          <div className="text-sm font-medium text-foreground">
+                            {review.pay && review.pay > 0 ? `$${review.pay}/hr` : 'N/A'}
+                          </div>
+                          <div className="text-xs text-muted-foreground">Pay</div>
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-foreground">
+                            {review.culture && !isNaN(review.culture) ? `${review.culture}/10` : 'N/A'}
+                          </div>
+                          <div className="text-xs text-muted-foreground">Culture</div>
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-foreground">
+                            {review.prestige && !isNaN(review.prestige) ? `${review.prestige}/10` : 'N/A'}
+                          </div>
+                          <div className="text-xs text-muted-foreground">Prestige</div>
+                        </div>
+                      </div>
                     </div>
+                    
                     <p className="text-foreground">{review.content}</p>
                   </CardContent>
                 </Card>
